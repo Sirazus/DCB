@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oris - Perfil</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 flex flex-col h-screen">
+<!-- Header -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+  <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+    <!-- Logo -->
+    <a href="index.html" class="flex items-center gap-2">
+      <i class="fas fa-tooth text-2xl text-blue-500"></i>
+      <span class="font-bold text-lg md:text-xl text-gray-700">Oris - Perfil</span>
+    </a>
+
+    <!-- Menú escritorio -->
+    <div class="hidden md:flex items-center gap-3">
+      <a href="chat.html" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:shadow-xl transition">
+        Iniciar Chat
+      </a>
+      <a id="dashboard-btn" href="#" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:shadow-xl transition">
+        📊 Dashboard
+      </a>
+      <button id="logout-btn" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:shadow-xl transition">
+        ⎋ Salir
+      </button>
+    </div>
+
+    <!-- Botón menú móvil -->
+    <button id="menu-toggle" class="md:hidden text-gray-600 focus:outline-none text-2xl">
+      ☰
+    </button>
+  </nav>
+
+  <!-- Menú móvil -->
+  <div id="mobile-menu" class="hidden md:hidden flex flex-col gap-3 px-4 pb-4 bg-gray-50 border-t">
+    <a href="chat.html" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow">Iniciar Chat</a>
+    <a id="dashboard-btn-mobile" href="#" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow">📊 Dashboard</a>
+    <button id="logout-btn-mobile" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow">⎋ Salir</button>
+  </div>
+</header>
+
+<!-- Content -->
+<main class="flex-1 flex items-center justify-center px-4 py-6">
+  <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg">
+    <h1 class="text-2xl font-bold text-gray-700 mb-6">Mi Perfil</h1>
+
+    <form id="profile-form" class="space-y-4">
+      <div>
+        <label class="block text-gray-600 text-sm">Correo electrónico</label>
+        <input id="email" type="text" disabled
+               class="w-full bg-gray-100 border border-gray-300 rounded-lg px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-gray-600 text-sm">Nombre y Apellidos</label>
+        <input id="name" type="text"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-gray-600 text-sm">Especialidad</label>
+        <input id="specialty" type="text"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-gray-600 text-sm">Universidad / Clínica</label>
+        <input id="institution" type="text"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-gray-600 text-sm">País</label>
+        <input id="country" type="text"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2"/>
+      </div>
+      <div>
+        <label class="block text-gray-600 text-sm">Teléfono</label>
+        <input id="phone" type="text"
+               class="w-full border border-gray-300 rounded-lg px-4 py-2"/>
+      </div>
+
+      <button type="submit"
+              class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold">
+        Guardar cambios
+      </button>
+    </form>
+
+    <p id="msg" class="text-sm mt-4 hidden"></p>
+  </div>
+</main>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  // 🔹 CONFIG FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyDA68yp5wR79_famYoft6CZnoHl2GaXRoQ",
+    authDomain: "orischtb.firebaseapp.com",
+    projectId: "orischtb",
+    storageBucket: "orischtb.firebasestorage.app",
+    messagingSenderId: "1066352768294",
+    appId: "1:1066352768294:web:02a02816d69bd07b51fde7",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const emailField = document.getElementById("email");
+  const nameField = document.getElementById("name");
+  const specialtyField = document.getElementById("specialty");
+  const institutionField = document.getElementById("institution");
+  const countryField = document.getElementById("country");
+  const phoneField = document.getElementById("phone");
+  const form = document.getElementById("profile-form");
+  const msg = document.getElementById("msg");
+
+  const dashboardBtn = document.getElementById("dashboard-btn");
+  const dashboardBtnMobile = document.getElementById("dashboard-btn-mobile");
+  const logoutBtn = document.getElementById("logout-btn");
+  const logoutBtnMobile = document.getElementById("logout-btn-mobile");
+
+  let currentUser = null;
+
+  // 🔹 Verifica usuario logueado y muestra botones
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    currentUser = user;
+    emailField.value = user.email;
+
+    // Lee rol desde Firestore
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      nameField.value = data.name || "";
+      specialtyField.value = data.specialty || "";
+      institutionField.value = data.institution || "";
+      countryField.value = data.country || "";
+      phoneField.value = data.phone || "";
+
+      // Muestra botones
+      dashboardBtn.classList.remove("hidden");
+      dashboardBtnMobile.classList.remove("hidden");
+      logoutBtn.classList.remove("hidden");
+      logoutBtnMobile.classList.remove("hidden");
+
+      // Redirección Dashboard según rol
+      if (data.role === "admin") {
+        dashboardBtn.href = "admin-dashboard.html";
+        dashboardBtnMobile.href = "admin-dashboard.html";
+      } else {
+        dashboardBtn.href = "user-dashboard.html";
+        dashboardBtnMobile.href = "user-dashboard.html";
+      }
+    }
+  });
+
+  // 🔹 Guardar cambios
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    try {
+      await setDoc(doc(db, "users", currentUser.uid), {
+        email: currentUser.email,
+        name: nameField.value,
+        specialty: specialtyField.value,
+        institution: institutionField.value,
+        country: countryField.value,
+        phone: phoneField.value,
+      }, { merge: true });
+
+      msg.textContent = "✅ Perfil actualizado correctamente";
+      msg.classList.remove("hidden");
+      msg.classList.remove("text-red-500");
+      msg.classList.add("text-green-500");
+    } catch (error) {
+      msg.textContent = "❌ " + error.message;
+      msg.classList.remove("hidden");
+      msg.classList.add("text-red-500");
+    }
+  });
+
+  // 🔹 Cerrar sesión
+  logoutBtn.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+  });
+  logoutBtnMobile.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+  });
+</script>
+</body>
+</html>

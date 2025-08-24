@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oris - Admin Dashboard</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    #questionsChart { max-height: 200px !important; }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white shadow flex items-center justify-between px-4 sm:px-6 py-3">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-tooth text-3xl text-blue-500"></i>
+      <div>
+        <span class="font-bold text-lg text-gray-800">Oris Admin</span>
+        <p id="admin-email" class="text-xs text-gray-500">Cargando...</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="chat.html" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
+        <i class="fas fa-comment-dots"></i>
+        <span class="hidden sm:inline ml-1">Nuevo Chat</span>
+      </a>
+      <button id="export-btn" class="bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
+        <i class="fas fa-file-excel"></i>
+        <span class="hidden sm:inline ml-1">Exportar Excel</span>
+      </button>
+      <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
+        <i class="fas fa-sign-out-alt"></i>
+        <span class="hidden sm:inline ml-1">Salir</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="flex-1 p-6 space-y-6">
+    <h1 class="text-xl font-bold text-gray-700">Panel de administrador</h1>
+
+    <!-- 🔹 KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white shadow rounded-xl p-6 text-center">
+        <p class="text-sm text-gray-500">Usuarios registrados</p>
+        <p id="kpi-users" class="text-3xl font-bold text-blue-600">0</p>
+      </div>
+      <div class="bg-white shadow rounded-xl p-6 text-center">
+        <p class="text-sm text-gray-500">Preguntas totales</p>
+        <p id="kpi-questions" class="text-3xl font-bold text-green-600">0</p>
+      </div>
+      <div class="bg-white shadow rounded-xl p-6 text-center">
+        <p class="text-sm text-gray-500">Preguntas este mes</p>
+        <p id="kpi-questions-month" class="text-3xl font-bold text-purple-600">0</p>
+      </div>
+    </div>
+
+    <!-- 🔹 Mini gráfico -->
+    <div class="bg-white rounded-xl shadow p-4">
+      <h2 class="font-semibold text-gray-700 mb-3">Preguntas por usuario</h2>
+      <canvas id="questionsChart"></canvas>
+    </div>
+
+    <!-- 📋 Historial -->
+    <div class="bg-white rounded-xl shadow p-4 overflow-x-auto">
+      <h2 class="font-semibold text-gray-700 mb-3">Todas las conversaciones</h2>
+      <table class="w-full text-sm text-left text-gray-700" id="conversationsTableFull">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-3 py-2">Usuario</th>
+            <th class="px-3 py-2">Email</th>
+            <th class="px-3 py-2">Rol</th>
+            <th class="px-3 py-2">Pregunta</th>
+            <th class="px-3 py-2">Respuesta</th>
+            <th class="px-3 py-2">Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="conversationsTable"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDA68yp5wR79_famYoft6CZnoHl2GaXRoQ",
+      authDomain: "orischtb.firebaseapp.com",
+      projectId: "orischtb",
+      storageBucket: "orischtb.firebasestorage.app",
+      messagingSenderId: "1066352768294",
+      appId: "1:1066352768294:web:02a02816d69bd07b51fde7",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const logoutBtn = document.getElementById("logout-btn");
+    const exportBtn = document.getElementById("export-btn");
+    const adminEmail = document.getElementById("admin-email");
+    const tableBody = document.getElementById("conversationsTable");
+
+    const kpiUsers = document.getElementById("kpi-users");
+    const kpiQuestions = document.getElementById("kpi-questions");
+    const kpiQuestionsMonth = document.getElementById("kpi-questions-month");
+
+    let chart;
+    let allConversations = [];
+
+    function renderChart(countsByUser) {
+      const ctx = document.getElementById("questionsChart").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: Object.keys(countsByUser),
+          datasets: [{
+            label: "Preguntas",
+            data: Object.values(countsByUser),
+            backgroundColor: "rgba(59,130,246,0.7)"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      adminEmail.textContent = user.email;
+
+      try {
+        const usersSnap = await getDocs(collection(db, "users"));
+        kpiUsers.textContent = usersSnap.size;
+
+        const q = query(collection(db, "conversations"), orderBy("timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
+
+        let tableHtml = "";
+        let countsByUser = {};
+        allConversations = [];
+
+        kpiQuestions.textContent = querySnapshot.size;
+
+        const now = new Date();
+        let questionsThisMonth = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const fecha = data.timestamp?.toDate();
+          const fechaStr = fecha ? fecha.toLocaleString() : "Sin fecha";
+          const email = data.email || "Sin email";
+          const rol = data.role || "user";
+
+          if (fecha && fecha.getMonth() === now.getMonth() && fecha.getFullYear() === now.getFullYear()) {
+            questionsThisMonth++;
+          }
+
+          allConversations.push({
+            Usuario: data.uid || "-",
+            Email: email,
+            Rol: rol,
+            Pregunta: data.user,
+            Respuesta: data.bot,
+            Fecha: fechaStr
+          });
+
+          tableHtml += `
+            <tr class="border-b">
+              <td class="px-3 py-2">${data.uid || "-"}</td>
+              <td class="px-3 py-2">${email}</td>
+              <td class="px-3 py-2">${rol}</td>
+              <td class="px-3 py-2">${data.user}</td>
+              <td class="px-3 py-2">${data.bot}</td>
+              <td class="px-3 py-2">${fechaStr}</td>
+            </tr>
+          `;
+
+          countsByUser[email] = (countsByUser[email] || 0) + 1;
+        });
+
+        kpiQuestionsMonth.textContent = questionsThisMonth;
+        tableBody.innerHTML = tableHtml || "<tr><td colspan='6' class='text-center text-gray-500 py-4'>No hay conversaciones registradas</td></tr>";
+
+        renderChart(countsByUser);
+      } catch (err) {
+        console.error("Error cargando datos admin:", err);
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
+
+    exportBtn.addEventListener("click", () => {
+      if (allConversations.length === 0) {
+        alert("No hay datos para exportar");
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(allConversations);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Conversaciones");
+      XLSX.writeFile(wb, "conversaciones_oris.xlsx");
+    });
+  </script>
+</body>
+</html>
