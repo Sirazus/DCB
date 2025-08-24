@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,46 +49,33 @@
 </head>
 <body class="text-gray-800">
 
-   <!-- Header -->
-<header class="bg-white shadow-sm sticky top-0 z-50">
-  <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-    
-    <!-- Logo -->
-    <a href="index.html" class="flex items-center gap-2">
-      <i class="fas fa-tooth text-2xl text-blue-500"></i>
-      <span class="font-bold text-lg md:text-xl text-gray-700">Oris Open Evidence</span>
-    </a>
+    <!-- ===== HEADER MODIFICADO ===== -->
+    <!-- Se eliminó el menú de hamburguesa y se unificó la barra de navegación -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+      <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-2">
+          <i class="fas fa-tooth text-2xl text-blue-500"></i>
+          <span class="font-bold text-lg md:text-xl text-gray-700">Oris Open Evidence</span>
+        </a>
 
-    <!-- Menú escritorio -->
-    <div class="hidden md:flex items-center gap-3">
-    <a href="chat.html" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 shadow-sm hover:shadow-md">
-        <i class="fas fa-comment-dots fa-fw"></i>
-        <span class="hidden sm:inline ml-2">Nuevo Chat</span>
-      </a>
-     <a id="profile-btn" href="profile.html" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"><i class="fas fa-user"></i><span class="hidden sm:inline ml-1">Perfil</span></a>
-
-    <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors"><i class="fas fa-sign-out-alt"></i><span class="hidden sm:inline ml-1">Salir</span></button>
-
-
-    </div>
-
-    <!-- Botón menú móvil -->
-    <button id="menu-toggle" class="md:hidden text-gray-600 focus:outline-none text-2xl">
-      ☰
-    </button>
-  </nav>
-
-  <!-- Menú móvil -->
-  <div id="mobile-menu" class="hidden md:hidden flex flex-col gap-3 px-4 pb-4 bg-gray-50 border-t">
-    <a href="chat.html" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow">Iniciar Chat</a>
-    <a id="profile-btn-mobile" href="profile.html" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow">👤 Mi Perfil</a>
-    <button id="logout-btn-mobile" class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow">⎋ Salir</button>
-  </div>
-</header>
-
-
-
-
+        <!-- Menú de navegación (unificado para móvil y escritorio) -->
+        <div class="flex items-center gap-3">
+            <a href="chat.html" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
+                <i class="fas fa-comment-dots"></i>
+                <span class="hidden sm:inline ml-1">Nuevo Chat</span>
+            </a>
+            <a id="profile-btn" href="profile.html" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
+                <i class="fas fa-user"></i>
+                <span class="hidden sm:inline ml-1">Perfil</span>
+            </a>
+            <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="hidden sm:inline ml-1">Salir</span>
+            </button>
+        </div>
+      </nav>
+    </header>
 
     <!-- Main Content -->
     <main>
@@ -221,7 +207,7 @@
         </section>
     </main>
 
-   <!-- Footer -->
+    <!-- Footer -->
     <footer class="bg-gray-800 text-white">
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
@@ -231,10 +217,10 @@
                         <span class="font-bold text-xl">Oris</span>
                     </div>
                      <p class="text-gray-400 mt-2 text-sm max-w-xs">
-                         <strong>Aviso Importante:</strong> Oris es una herramienta informativa 
-                         y no reemplaza el diagnóstico de un odontólogo profesional. 
-                         Consulta siempre a tu dentista.
-                     </p>
+                          <strong>Aviso Importante:</strong> Oris es una herramienta informativa 
+                          y no reemplaza el diagnóstico de un odontólogo profesional. 
+                          Consulta siempre a tu dentista.
+                       </p>
                 </div>
                 <div class="flex space-x-6">
                     <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter fa-lg"></i></a>
@@ -248,43 +234,45 @@
         </div>
     </footer>
 
-    
-
-    <!-- Script responsive header + Firebase -->
+    <!-- ===== SCRIPT MODIFICADO ===== -->
+    <!-- Se eliminó la lógica del menú móvil -->
     <script type="module">
-      import { firebaseConfig } from './firebase-config.js'; 
+      // Reemplaza esto con tu configuración real de Firebase
+      const firebaseConfig = {
+          apiKey: "TU_API_KEY",
+          authDomain: "TU_AUTH_DOMAIN",
+          projectId: "TU_PROJECT_ID",
+          storageBucket: "TU_STORAGE_BUCKET",
+          messagingSenderId: "TU_MESSAGING_SENDER_ID",
+          appId: "TU_APP_ID"
+      };
+
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
 
       const profileBtn = document.getElementById("profile-btn");
       const logoutBtn = document.getElementById("logout-btn");
-      const profileBtnMobile = document.getElementById("profile-btn-mobile");
-      const logoutBtnMobile = document.getElementById("logout-btn-mobile");
 
-      // ✅ Mostrar/ocultar botones según login
+      // Mostrar/ocultar botones según el estado de login
       onAuthStateChanged(auth, (user) => {
         if (user) {
           profileBtn.classList.remove("hidden");
           logoutBtn.classList.remove("hidden");
-          profileBtnMobile.classList.remove("hidden");
-          logoutBtnMobile.classList.remove("hidden");
         } else {
           profileBtn.classList.add("hidden");
           logoutBtn.classList.add("hidden");
-          profileBtnMobile.classList.add("hidden");
-          logoutBtnMobile.classList.add("hidden");
         }
       });
 
-      // ✅ Logout
+      // Función de Logout
       function handleLogout() {
         signOut(auth).then(() => {
-          alert("Sesión cerrada correctamente");
+          // En una aplicación real, es mejor usar un modal que un alert.
+          // alert("Sesión cerrada correctamente");
+          console.log("Sesión cerrada correctamente");
           window.location.href = "index.html";
         }).catch((error) => {
           console.error("Error al cerrar sesión:", error);
@@ -292,19 +280,6 @@
       }
 
       logoutBtn.addEventListener("click", handleLogout);
-      logoutBtnMobile.addEventListener("click", handleLogout);
-
-      // ✅ Menú móvil
-      const menuToggle = document.getElementById("menu-toggle");
-      const mobileMenu = document.getElementById("mobile-menu");
-
-      menuToggle.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-      });
     </script>
   </body>
-</html>
-
-
-</body>
 </html>
