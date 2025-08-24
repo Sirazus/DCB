@@ -10,5 +10,3 @@ export const firebaseConfig = {
   measurementId: "%FIREBASE_MEASUREMENT_ID%" 
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
