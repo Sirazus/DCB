@@ -1,6 +1,6 @@
 // Este es el contenido de tu nuevo archivo: firebase-config.js
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "%FIREBASE_API_KEY%",
   authDomain: "%FIREBASE_AUTH_DOMAIN%",
   projectId: "%FIREBASE_PROJECT_ID%",
