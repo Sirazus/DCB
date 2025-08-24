@@ -1,5 +1,4 @@
 
-<script src="firebase-config.js"></script>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -50,7 +49,8 @@
   </div>
 
   <!-- Firebase -->
-  <script type="module">
+  <script type="module">    
+    import { firebaseConfig } from './firebase-config.js'; 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
