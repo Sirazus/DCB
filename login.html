@@ -71,7 +71,7 @@
         await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
         window.location.href = "chat.html"; // va al chat si login OK
       } catch (error) {
-        msg.textContent = "❌ " + error.message;
+        msg.textContent = "❌ Error en el email o la contraseña" + error.message;
         msg.classList.remove("hidden");
         msg.classList.add("text-red-500");
       }
@@ -93,7 +93,7 @@
         msg.classList.remove("text-red-500");
         msg.classList.add("text-green-500");
       } catch (error) {
-        msg.textContent = "❌ " + error.message;
+        msg.textContent = "❌ Error en el email" + error.message;
         msg.classList.remove("hidden");
         msg.classList.add("text-red-500");
       }
