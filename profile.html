@@ -103,15 +103,6 @@
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 🔹 CONFIG FIREBASE
-  const firebaseConfig = {
-    apiKey: "AIzaSyDA68yp5wR79_famYoft6CZnoHl2GaXRoQ",
-    authDomain: "orischtb.firebaseapp.com",
-    projectId: "orischtb",
-    storageBucket: "orischtb.firebasestorage.app",
-    messagingSenderId: "1066352768294",
-    appId: "1:1066352768294:web:02a02816d69bd07b51fde7",
-  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -208,3 +199,4 @@
 </script>
 </body>
 </html>
+<script src="firebase-config.js"></script>

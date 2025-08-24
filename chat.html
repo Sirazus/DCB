@@ -1,3 +1,5 @@
+<script src="firebase-config.js"></script>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -61,14 +63,7 @@
     import { getFirestore, collection, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyDA68yp5wR79_famYoft6CZnoHl2GaXRoQ",
-      authDomain: "orischtb.firebaseapp.com",
-      projectId: "orischtb",
-      storageBucket: "orischtb.firebasestorage.app",
-      messagingSenderId: "1066352768294",
-      appId: "1:1066352768294:web:02a02816d69bd07b51fde7",
-    };
+    
 
     // Inicialización de servicios de Firebase
     const app = initializeApp(firebaseConfig);
