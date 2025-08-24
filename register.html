@@ -1,0 +1,126 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oris - Registro</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+  <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
+    <div class="flex flex-col items-center mb-6">
+      <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md mb-3">
+        <i class="fas fa-tooth text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-700">Crear cuenta en Oris</h1>
+      <p class="text-gray-500 text-sm">Regístrate con tu correo y empieza a usar el chatbot</p>
+    </div>
+
+    <div class="space-y-4">
+      <input id="email" type="email" placeholder="Correo electrónico"
+             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      <input id="password" type="password" placeholder="Contraseña"
+             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      <input id="password2" type="password" placeholder="Repite la contraseña"
+             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+      <button id="register-btn"
+              class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold">
+        Registrarse
+      </button>
+      <p class="text-sm text-gray-500 mt-3 text-center">
+        ¿Ya tienes cuenta? <a href="login.html" class="text-blue-500 hover:underline">Inicia sesión aquí</a>
+      </p>
+    </div>
+
+    <p id="error-msg" class="text-red-500 text-sm mt-4 hidden"></p>
+  </div>
+
+  <script type="module">    
+  import { firebaseConfig } from './firebase-config.js'; 
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword,
+    sendEmailVerification, // 👈 1. IMPORTAR sendEmailVerification
+    signOut                // 👈 2. IMPORTAR signOut
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    doc, 
+    setDoc, 
+    serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Selectores de elementos
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const password2Input = document.getElementById("password2");
+  const registerBtn = document.getElementById("register-btn");
+  const errorMsg = document.getElementById("error-msg");
+
+  registerBtn.addEventListener("click", async () => {
+    // Limpiar errores previos
+    errorMsg.classList.add("hidden");
+
+    if (passwordInput.value !== password2Input.value) {
+      errorMsg.textContent = "❌ Las contraseñas no coinciden";
+      errorMsg.classList.remove("hidden");
+      return;
+    }
+    
+    // Desactivar botón para evitar múltiples envíos
+    registerBtn.disabled = true;
+    registerBtn.textContent = "Registrando...";
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        emailInput.value, 
+        passwordInput.value
+      );
+
+      // Guardar datos extra en Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        email: emailInput.value,
+        role: "user",
+        createdAt: serverTimestamp()
+      });
+
+      // --- 👇 3. LÓGICA DE VERIFICACIÓN ---
+      
+      // Enviar el email de verificación
+      await sendEmailVerification(userCredential.user);
+
+      // Cerrar la sesión del usuario recién creado
+      await signOut(auth);
+
+      // Informar al usuario y redirigir
+      alert("¡Registro exitoso! Revisa tu correo (y la carpeta de spam) para verificar tu cuenta antes de iniciar sesión.");
+      window.location.href = "login.html";
+
+    } catch (error) {
+      errorMsg.textContent = "❌ " + error.message;
+      errorMsg.classList.remove("hidden");
+      // Reactivar el botón si hay un error
+      registerBtn.disabled = false;
+      registerBtn.textContent = "Registrarse";
+    }
+  });
+</script>
+
+</body>
+</html>

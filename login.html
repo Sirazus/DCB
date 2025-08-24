@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oris - Login</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+  <!-- Card -->
+  <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
+    <div class="flex flex-col items-center mb-6">
+      <div class="w-16 h-16 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md mb-3">
+        <i class="fas fa-tooth text-2xl"></i>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-700">Inicia sesión en Oris</h1>
+      <p class="text-gray-500 text-sm">Accede con tu cuenta registrada</p>
+    </div>
+
+    <!-- Form -->
+    <div class="space-y-4">
+      <input id="email" type="email" placeholder="Correo electrónico"
+             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      <input id="password" type="password" placeholder="Contraseña"
+             class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+
+      <button id="login-btn"
+              class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold">
+        Iniciar sesión
+      </button>
+
+      <!-- Enlaces -->
+      <div class="flex justify-between text-sm text-gray-500 mt-2">
+        <a href="register.html" class="hover:text-blue-500">Crear cuenta</a>
+        <button id="reset-btn" class="hover:text-blue-500">¿Olvidaste tu contraseña?</button>
+      </div>
+    </div>
+
+    <p id="msg" class="text-sm mt-4 hidden"></p>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">    
+    import { firebaseConfig } from './firebase-config.js'; 
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginBtn = document.getElementById("login-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const msg = document.getElementById("msg");
+
+    // 🔹 Iniciar sesión
+    loginBtn.addEventListener("click", async () => {
+      try {
+        await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+        window.location.href = "chat.html"; // va al chat si login OK
+      } catch (error) {
+        msg.textContent = "❌ Error en el email o la contraseña" + error.message;
+        msg.classList.remove("hidden");
+        msg.classList.add("text-red-500");
+      }
+    });
+
+    // 🔹 Recuperar contraseña
+    resetBtn.addEventListener("click", async () => {
+      const email = emailInput.value.trim();
+      if (!email) {
+        msg.textContent = "⚠️ Ingresa tu correo para restablecer la contraseña.";
+        msg.classList.remove("hidden");
+        msg.classList.add("text-orange-500");
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        msg.textContent = "📩 Se envió un correo para restablecer tu contraseña.";
+        msg.classList.remove("hidden");
+        msg.classList.remove("text-red-500");
+        msg.classList.add("text-green-500");
+      } catch (error) {
+        msg.textContent = "❌ Error en el email" + error.message;
+        msg.classList.remove("hidden");
+        msg.classList.add("text-red-500");
+      }
+    });
+  </script>
+</body>
+</html>
